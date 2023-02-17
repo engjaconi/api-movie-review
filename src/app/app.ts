@@ -1,7 +1,8 @@
 import express from 'express';
-import cors from 'cors';
 import dotenv from 'dotenv';
+import cors from 'cors';
 import mongoose from 'mongoose';
+
 dotenv.config();
 
 // Conexão ao Banco Mongoose
@@ -17,17 +18,13 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use(cors({
-    origin: ['http://localhost:4200'],
-    methods: ['GET', 'PUT', 'POST', 'DELETE']
-}));
+import { indexRouter } from '../routes/indexRoute';
+import { userRouter } from '../routes/userRoute';
+import { movieRoute } from '../routes/movieRoute';
+import { movieRatingRoute } from '../routes/movieRatingRoute';
 
-import indexRoute from '../routes/indexRoute';
-import userRouter from '../routes/userRoute';
-import movieRoute from '../routes/movieRoute';
-import movieRatingRoute from '../routes/movieRatingRoute';
-
-app.use('/', indexRoute);
+app.use(cors());
+app.use('/', indexRouter);
 app.use('/users', userRouter);
 app.use('/movies', movieRoute);
 app.use('/ratings', movieRatingRoute);

@@ -1,10 +1,8 @@
-import express from "express";
+import { Router } from "express";
+import { MovieController } from "../controllers/MovieController";
 
-import { movieController } from "../controllers/movieController";
+export const movieRoute = Router();
+const movieControler = new MovieController();
 
-const movieRoute = express.Router();
-
-movieRoute.post('/', movieController.post);
-movieRoute.get('/', movieController.get);
-
-export default movieRoute;
+movieRoute.post('/', movieControler.post);
+movieRoute.get('/', movieControler.get);

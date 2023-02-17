@@ -1,54 +1,50 @@
 import { Request, Response } from 'express';
-import axios from 'axios';
+import Axios from 'axios';
+import { AuthService } from '../services/AuthService';
+import { ValidatorsContract } from '../validators/ValidationContract';
+import { MovieRepository } from '../repositories/MovieRepository';
+import { IMovie } from '../interfaces/IMovie';
+import { IUser } from '../interfaces/IUser';
 
-import { validatorsContract } from '../validators/validationContract';
-import { authService } from '../services/authService';
-import { movieRepository } from '../repositories/movieRepository';
+const authService = new AuthService();
+const validatorsContract = new ValidatorsContract();
+const movieRepository = new MovieRepository();
 
+const axios = Axios.create();
 
-let instance = axios.create({
-    baseURL: 'https://api.themoviedb.org/3/search/movie',
-});
+export class MovieController {
+    async get(req: Request, res: Response) {
 
-interface JwtPayload {
-    age: string;
-}
-
-export const movieController = {
-    get: async (req: Request, resposta: Response) => {
         validatorsContract.isRequired(req.body.token, 'O token é necessário');
 
         if (!validatorsContract.isValid()) {
-            resposta.status(400).send(validatorsContract.getErrors()).end();
+            res.status(400).send(validatorsContract.getErrors()).end();
             validatorsContract.clear();
             return;
         }
 
-        // Recupera o token
-        const token = req.body.token || req.query.token || req.headers['x-acess-token'];
-
         // Decodifica o token
-        const data = await authService.decodeToken(token) as JwtPayload;
+        const data = authService.decodeToken(req);
 
-        let isAdult = Number(data.age) >= 18;
-        await instance.get('/', {
-            params: {
-                api_key: process.env.API_KEY_MOVIE_DB,
-                language: 'pr-BR',
-                query: req.query.search,
-                include_adult: isAdult
-            }
-        })
-            .then((res) => {
-                ;
-                resposta.send(res.data.results);
-            })
-            .catch(function (error) {
-                console.error(error);
-            });
-    },
+        let isAdult = Number(data!.age) >= 18;
+        const URL = `https://api.themoviedb.org/3/search/movie?api_key=${process.env.API_KEY_MOVIE_DB}&language=pt-BR&query=${req.query.search}&include_adult=${isAdult}`;
 
-    post: async (req: Request, res: Response) => {
+        await axios.get(URL)
+            .then(resposta => resposta.data.results)
+            .then(movies => movies.map((movie: IMovie) => {
+                return {
+                    id: movie.id,
+                    title: movie.title,
+                    adult: movie.adult,
+                    overview: movie.overview,
+                    poster_path: `https://image.tmdb.org/t/p/w500/${movie.poster_path}`
+                }
+            }))
+            .then(movieList => res.send(movieList))
+            .catch(erro => console.log('Error: ', erro))
+    }
+
+    async post(req: Request, res: Response) {
         validatorsContract.isRequired(req.body.token, 'O token é necessário');
         validatorsContract.isRequired(req.body.id, 'O id é necessário');
         validatorsContract.hasMinLen(req.body.title, 3, 'O título deve conter pelo menos 3 caracteres');
@@ -61,23 +57,19 @@ export const movieController = {
             return;
         }
 
-        try {
-            // Recupera o token
-            const token = req.body.token || req.query.token || req.headers['x-acess-token'];
-
-            // Decodifica o token
-            const data = await authService.decodeToken(token);
-            await movieRepository.create({
-                id: req.body.id,
-                title: req.body.title,
-                adult: req.body.adult,
-                overview: req.body.overview,
-                poster_path: req.body.poster_path
-            });
-
-            res.status(201).send({ message: 'Filme cadastrado com sucesso!' });
-        } catch (error) {
-            res.status(500).send({ message: 'Falha ao processar a requisição' });
+        if (authService.authorize(req)) {
+            movieRepository
+                .create({
+                    id: req.body.id,
+                    title: req.body.title,
+                    adult: req.body.adult,
+                    overview: req.body.overview,
+                    poster_path: req.body.poster_path
+                })
+                .then(() => res.status(201).send({ message: 'Filme cadastrado com sucesso!' }))
+                .catch(() => res.status(500).send({ message: 'Falha ao processar a requisição' }));
+        } else {
+            res.status(401).send({ message: 'Token inválido' })
         }
     }
 }

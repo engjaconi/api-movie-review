@@ -1,18 +1,28 @@
+import { IMovieRating } from "../interfaces/IMovieRating";
 import MovieRating from "../models/MovieRating";
 
-export const movieRatingRepository = {
+export class MovieRatingRepository {
 
-    create: async (data: any) => {
+    async create(data: IMovieRating): Promise<boolean> {
+        if(await this.findRating(data)) {
+            return false;
+        }
         const rating = new MovieRating(data);
         await rating.save();
-    },
+        return true;
+    }
 
-    getAll: async (userId: string) => {
+    async getAll(userId: string) {
         const res = await MovieRating.find({ user: userId }).populate(['movie']);
         return res;
-    },
+    }
 
-    put: async (id: any, data: any) => {
+    async findRating(data: IMovieRating) {
+        let hasRating = !!await MovieRating.find({ user: data.user, movie: data.movie  });
+        return hasRating;
+    }
+
+    async put(id: string, data: IMovieRating) {
         await MovieRating
             .findByIdAndUpdate(id, {
                 $set: {
@@ -20,9 +30,9 @@ export const movieRatingRepository = {
                     comment: data.comment,
                 }
             });
-    },
+    }
 
-    delete: async (id: any) => {
+    async delete(id: string) {
         await MovieRating.findByIdAndRemove(id);
     }
 }

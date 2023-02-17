@@ -1,13 +1,15 @@
-import mongoose, { Schema } from 'mongoose';
+import { Schema, model } from 'mongoose';
 
 const MovieRating = new Schema({
     user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+        unique: true
     },
     movie: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Movie'
+        type: Schema.Types.ObjectId,
+        ref: 'Movie',
+        unique: true
     },
     evaluationNote: {
         type: Number,
@@ -20,4 +22,4 @@ const MovieRating = new Schema({
 
 });
 
-export default mongoose.model('MovieRating', MovieRating);
+export default model('MovieRating', MovieRating);

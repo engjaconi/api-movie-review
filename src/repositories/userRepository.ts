@@ -1,16 +1,16 @@
+import { IUser } from "../interfaces/IUser";
 import User from "../models/User";
 
-export const userRepository = {
-
-    create: async (data: any) => {
+export class UserRepository {
+    async create(data: IUser) {
         const user = new User(data);
         await user.save();
-    },
+    }
 
-    authenticate: async (data: any) => {
+    async authenticate(email: string, password: string) {
         const res = await User.findOne({
-            email: data.email, password: data.password
+            email: email, password: password
         });
         return res;
-    },
+    }
 }

@@ -1,12 +1,10 @@
-import express from "express";
+import { Router } from "express";
+import { MovieRatingController } from "../controllers/MovieRatingController";
 
-import { MovieRatingController } from "../controllers/movieRatingController";
+export const movieRatingRoute = Router();
+const movieRatingControler = new MovieRatingController;
 
-const movieRatingRoute = express.Router();
-
-movieRatingRoute.post('/', MovieRatingController.post);
-movieRatingRoute.get('/', MovieRatingController.get);
-movieRatingRoute.put('/', MovieRatingController.put);
-movieRatingRoute.delete('/', MovieRatingController.delete);
-
-export default movieRatingRoute;
+movieRatingRoute.post('/', movieRatingControler.post);
+movieRatingRoute.get('/', movieRatingControler.get);
+movieRatingRoute.put('/', movieRatingControler.put);
+movieRatingRoute.delete('/', movieRatingControler.delete);

@@ -1,15 +1,17 @@
 import md5 from 'md5';
 import { Request, Response } from 'express';
-
 import { config } from '../../config';
-import { userRepository } from '../repositories/userRepository';
-import { validatorsContract } from '../validators/validationContract';
-import { authService } from '../services/authService';
+import { UserRepository } from '../repositories/UserRepository';
+import { ValidatorsContract } from '../validators/ValidationContract';
+import { AuthService } from '../services/AuthService';
 
 
-export const userController = {
+const validatorsContract = new ValidatorsContract();
+const authService = new AuthService();
+const userRepository = new UserRepository();
 
-    post: async (req: Request, res: Response) => {
+export class UserController {
+    async post(req: Request, res: Response) {
         validatorsContract.hasMinLen(req.body.name, 3, 'O nome deve conter pelo menos 3 caracteres');
         validatorsContract.isRequired(req.body.age, 'A idade é necessária');
         validatorsContract.isEmail(req.body.email, 'E-mail inválido');
@@ -33,14 +35,16 @@ export const userController = {
         } catch (error) {
             res.status(500).send({ message: 'Falha ao processar a requisição' });
         }
-    },
 
-    authenticate: async (req: Request, res: Response) => {
+    }
+
+    async authenticate(req: Request, res: Response) {
         try {
-            const user = await userRepository.authenticate({
-                email: req.body.email,
-                password: md5(req.body.password + config.SALT_KEY)
-            });
+            const user = await userRepository
+                .authenticate(
+                    req.body.email,
+                    md5(req.body.password + config.SALT_KEY)
+                );
 
             if (!user) {
                 res.status(404).send({
@@ -49,7 +53,7 @@ export const userController = {
                 return;
             }
 
-            const token = await authService.generateToken({
+            const token = authService.generateToken({
                 id: user._id,
                 email: user.email,
                 name: user.name,

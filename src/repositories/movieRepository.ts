@@ -1,8 +1,9 @@
+import { IMovie } from "../interfaces/IMovie";
 import Movie from "../models/Movie";
 
-export const movieRepository = {
+export class MovieRepository {
 
-    create: async (data: any) => {
+    async create(data: IMovie) { 
         const movie = new Movie(data);
         await movie.save();
     }

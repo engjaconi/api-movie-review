@@ -1,4 +1,4 @@
-import mongoose, { Schema } from 'mongoose';
+import { Schema, model } from 'mongoose';
 
 const Movie = new Schema({
     id: {
@@ -8,11 +8,9 @@ const Movie = new Schema({
     },
     title: {
         type: String,
-        require: true
     },
     adult: {
         type: Boolean,
-        require: true
     },
     overview: {
         type: String,
@@ -24,4 +22,4 @@ const Movie = new Schema({
     }
 });
 
-export default mongoose.model('Movie', Movie);
+export default model('Movie', Movie);

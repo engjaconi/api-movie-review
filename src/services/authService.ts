@@ -1,27 +1,34 @@
+import { BlobOptions } from 'buffer';
 import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
-
 import { config } from '../../config';
+import { IUser } from '../interfaces/IUser';
 
-export const authService = {
-    generateToken: async (data: any) => {
+export class AuthService {
+    generateToken(data: any) {
         return jwt.sign(data, config.SALT_KEY, { expiresIn: '1d' });
-    },
+    }
 
-    decodeToken: async (token: string) => {
-        const data = await jwt.verify(token, config.SALT_KEY);
-        return data;
-    },
+    getToken(req: Request): string {
+        // Recupera o token
+        return req.body.token || req.query.token || req.headers['x-acess-token'];
+    }
 
-    authorize: function (req: Request, res: Response, next: NextFunction) {
-        const token = req.body.token || req.query.token || req.headers['x-access-token'];
+    decodeToken(req: Request) {
+        // Válida o token e retorna o conteúdo
+        if (this.authorize(req)) {
+            const data: IUser = <IUser>jwt.verify(this.getToken(req), config.SALT_KEY);
+            return data;
+        }
+    }
 
-        jwt.verify(token, config.SALT_KEY, (error: any) => {
-            if (error) {
-                res.status(401).json({ message: "Token Inválido" });
-            } else {
-                next();
+    authorize(req: Request): boolean {
+        let isValidToken = false;
+        jwt.verify(this.getToken(req), config.SALT_KEY, (error: any) => {
+            if (!error) {
+                isValidToken = true;
             }
-        })
+        });
+        return isValidToken;
     }
 }
