@@ -1,5 +1,4 @@
-import { BlobOptions } from 'buffer';
-import { NextFunction, Request, Response } from 'express';
+import { Request } from 'express';
 import jwt from 'jsonwebtoken';
 import { config } from '../../config';
 import { IUser } from '../interfaces/IUser';

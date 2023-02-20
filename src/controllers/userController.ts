@@ -3,7 +3,7 @@ import { Request, Response } from 'express';
 import { config } from '../../config';
 import { UserRepository } from '../repositories/UserRepository';
 import { ValidatorsContract } from '../validators/ValidationContract';
-import { AuthService } from '../services/AuthService';
+import { AuthService } from '../services/authService';
 
 
 const validatorsContract = new ValidatorsContract();
@@ -61,15 +61,10 @@ export class UserController {
             })
 
             res.status(201).send({
-                token: token,
-                data: {
-                    email: user.email,
-                    name: user.name,
-                    age: user.age,
-                }
+                token: token
             });
-        } catch (error) {
-            res.status(500).send({ message: 'Falha ao processar a requisição' });
-        }
+    } catch(error) {
+        res.status(500).send({ message: 'Falha ao processar a requisição' });
     }
+}
 }

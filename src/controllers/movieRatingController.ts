@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
-import { Error } from "mongoose";
 import { MovieRatingRepository } from "../repositories/MovieRatingRepository";
-import { AuthService } from "../services/AuthService";
+import { AuthService } from "../services/authService";
 import { ValidatorsContract } from "../validators/ValidationContract";
 
 const authService = new AuthService();

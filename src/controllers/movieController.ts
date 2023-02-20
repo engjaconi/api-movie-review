@@ -1,10 +1,9 @@
 import { Request, Response } from 'express';
 import Axios from 'axios';
-import { AuthService } from '../services/AuthService';
+import { AuthService } from '../services/authService';
 import { ValidatorsContract } from '../validators/ValidationContract';
 import { MovieRepository } from '../repositories/MovieRepository';
 import { IMovie } from '../interfaces/IMovie';
-import { IUser } from '../interfaces/IUser';
 
 const authService = new AuthService();
 const validatorsContract = new ValidatorsContract();
